@@ -1,26 +1,25 @@
 * general emacs stuff
 #+BEGIN_SRC emacs-lisp
-  (setq backup-directory-alist
-        `((".*" . ,temporary-file-directory)))
+  (setq backup-directory-alist `(("." . ,(expand-file-name "~/.emacs-backups"))))
   (setq auto-save-file-name-transforms
         `((".*" ,temporary-file-directory t)))
-
+  
   (require 'ido)
   (ido-mode t)
-
+  
   ;; (add-to-list 'load-path "~/.emacs.d/auto-complete-master")
   (require 'auto-complete)
   (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
   (require 'auto-complete-config)
   (ac-config-default)
   (global-auto-complete-mode t)
-
-
+  
+  
   (require 'zenburn-theme)
-
+  
   (setq inhibit-startup-screen t)
   (setq initial-scratch-message nil)
-
+  
   (defun my-back-window ()
     (interactive)
     (other-window -1)
@@ -55,27 +54,32 @@
           (backward-char) (insert "\n"))
         (indent-region begin end))
       (message "Ah, much better!"))
-
+  
   (put 'downcase-region 'disabled nil)
-
+  
   (defun my-find-file-check-make-large-file-read-only-hook ()
     "If a file is over a given size, make the buffer read only."
     (when (> (buffer-size) (* 1024 1024))
       (setq buffer-read-only t)
       (buffer-disable-undo)
       (fundamental-mode)))
-
+  
   (add-hook 'find-file-hooks 'my-find-file-check-make-large-file-read-only-hook)
-
+  
   (eval-after-load 'eww '(define-key eww-mode-map (kbd "<backtab>") 'shr-previous-link))
-
+  
   (tool-bar-mode -1)
   (menu-bar-mode -1)
-
+  
   (fset 'my-epoch-to-date
      [?\M-w ?\C-e ?  ?\C-u ?\M-! ?d ?a ?t ?e ?  ?- ?d ?  ?@ ?\C-y return])
   (global-set-key (kbd "\C-z d") 'my-epoch-to-date)
 #+END_SRC
+
+* amazon stuff
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/amzn.el")
+#+end_src
 
 * org mode stuff
 ** use locally installed development version for Clojure support
@@ -95,6 +99,9 @@
 
 ** org-mode customizations
 #+BEGIN_SRC emacs-lisp
+  (load-file "~/.emacs.d/plantuml-mode.el")
+  (require 'plantuml-mode)
+
   ;; active Org-babel languages
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -105,7 +112,7 @@
      (perl . t)
      (ruby . t)))
   (setq org-plantuml-jar-path
-        (expand-file-name "~/plantuml.jar"))
+        (expand-file-name "~/UMLDiagrams/env/PlantUMLBuildLogic-1.0/runtime/bin/plantuml.jar"))
 
   (setq org-export-with-sub-superscripts nil)
 
@@ -132,48 +139,10 @@
 #+RESULTS:
 : ck/org-confirm-babel-evaluate
 
-* python development
-#+BEGIN_SRC emacs-lisp
-  ; python-mode
-  (setq py-install-directory "~/.emacs.d/python-mode.el-6.0.11")
-  (add-to-list 'load-path py-install-directory)
-  (require 'python-mode)
-
-  ; use IPython
-  (setq-default py-shell-name "ipython2.7")
-  (setq-default py-which-bufname "IPython")
-  (setq py-force-py-shell-name-p t)
-
-  ; don't split windows
-  (setq py-split-windows-on-execute-p nil)
-  ; try to automagically figure out indentation
-  (setq py-smart-indentation t)
-
-  (require 'jedi)
-  (add-hook 'python-mode-hook 'jedi:setup)
-  (setq jedi:setup-keys t)                      ; optional
-  (setq jedi:complete-on-dot t)                 ; optional
-  (add-hook 'ein:connect-mode-hook 'ein:jedi-setup)
-
-  (defun my-switch-to-ipython()
-    (interactive)
-    (switch-to-buffer "*IPython*")
-  )
-  (global-set-key (kbd "\C-z i") 'my-switch-to-ipython)
-
-  (fset 'my-cpaste-region
-     [?\M-w ?\C-x ?b ?* ?I ?P ?y ?t ?h ?o ?n ?* return ?% ?c ?p ?a ?s ?t ?e return ?\C-y return ?- ?- return])
-  (global-set-key (kbd "\C-z c") 'my-cpaste-region)
-
-  (fset 'my-org-python-block
-     [?# ?+ ?B ?E ?G ?I ?N ?_ ?S ?R ?C ?  ?p ?y ?t ?h ?o ?n return return ?# ?+ ?E ?N ?D ?_ ?S ?R ?C ?\C-p ?\C-c ?\'])
-  (global-set-key (kbd "\C-z p") 'my-org-python-block)
-
-#+END_SRC
 * sql stuff
 #+BEGIN_SRC emacs-lisp
   (defun my-sql-mode-defaults ()
-    (sql-set-product 'postgres)
+    (sql-set-product 'oracle)
     (when (not (eq nil (get-buffer "*SQL*")))
       (sql-set-sqli-buffer))
   )
@@ -184,31 +153,19 @@
   (global-set-key (kbd "\C-z q") 'my-org-sql-block)
 
 #+END_SRC
-* clojure
-#+begin_src emacs-lisp
-  (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
-
-  (setq nrepl-log-messages t)
-
-  (setq nrepl-hide-special-buffers t)
-
-#+end_src
-
-#+RESULTS:
-: t
 * ediff customization
 #+begin_src emacs-lisp
   (require 'ediff-init)           ;ensure the macro is defined, so we can override it
-
+  
   (defmacro ediff-char-to-buftype (arg)
     `(cond ((memq ,arg '(?a ?A)) 'A)
        ((memq ,arg '(?b ?B)) 'B)
        ((memq ,arg '(?c ?C)) 'C)
        ((memq ,arg '(?d ?D)) 'D)
        ))
-
+  
   (require 'ediff)
-
+  
   ;; Literally copied from ediff-util
   ;; need to re-evaluate because it uses the macro defined above
   ;; and the compiled version needs to be re-compiled with the new definition
@@ -221,7 +178,7 @@
   `ac', etc., which is used to determine the types of buffers to be used for
   copying difference regions.  The first character in the sequence specifies
   the source buffer and the second specifies the target.
-
+  
   If the second optional argument, a 2-character string, is given, use it to
   determine the source and the target buffers instead of the command keys."
     (interactive "P")
@@ -229,7 +186,7 @@
     (or keys (setq keys (this-command-keys)))
     (if (eq arg '-) (setq arg -1)) ; translate neg arg to -1
     (if (numberp arg) (ediff-jump-to-difference arg))
-
+  
     (let* ((key1 (aref keys 0))
        (key2 (aref keys 1))
        (char1 (ediff-event-key key1))
@@ -240,13 +197,13 @@
            (ediff-char-to-buftype char2))
   ;; recenter with rehighlighting, but no messages
   (ediff-recenter)))
-
+  
   (defun ediff-copy-D-to-C (arg)
     "Copy ARGth difference region from both buffers A and B to C.
   ARG is a prefix argument.  If nil, copy the current difference region."
     (interactive "P")
     (ediff-diff-to-diff arg "dc"))
-
+  
   (defun ediff-copy-diff (n from-buf-type to-buf-type
                 &optional batch-invocation reg-to-copy)
     (let* ((to-buf (ediff-get-buffer to-buf-type))
@@ -257,12 +214,12 @@
        messg
        ediff-verbose-p
        reg-to-delete reg-to-delete-beg reg-to-delete-end)
-
+  
   (setq reg-to-delete-beg
         (ediff-get-diff-posn to-buf-type 'beg n ctrl-buf))
   (setq reg-to-delete-end
         (ediff-get-diff-posn to-buf-type 'end n ctrl-buf))
-
+  
   (if (eq from-buf-type 'D)
       ;; want to copy *both* A and B
       (if reg-to-copy
@@ -273,11 +230,11 @@
     (if reg-to-copy
         (setq from-buf-type nil)
       (setq reg-to-copy (ediff-get-region-contents n from-buf-type ctrl-buf))))
-
+  
   (setq reg-to-delete (ediff-get-region-contents
                n to-buf-type ctrl-buf
                reg-to-delete-beg reg-to-delete-end))
-
+  
   (if (string= reg-to-delete reg-to-copy)
       (setq saved-p nil) ; don't copy identical buffers
     ;; seems ok to copy
@@ -287,10 +244,10 @@
           (ediff-with-current-buffer to-buf
             ;; to prevent flags from interfering if buffer is writable
             (let ((inhibit-read-only (null buffer-read-only)))
-
+  
           (goto-char reg-to-delete-end)
           (insert reg-to-copy)
-
+  
           (if (> reg-to-delete-end reg-to-delete-beg)
               (kill-region reg-to-delete-beg reg-to-delete-end))
           ))
@@ -306,20 +263,20 @@
              (setq saved-p nil)
              )))
     )
-
+  
   ;; adjust state of difference in case 3-way and diff was copied ok
   (if (and saved-p three-way)
       (ediff-set-state-of-diff-in-all-buffers n ctrl-buf))
-
+  
   (if batch-invocation
       (ediff-clear-fine-differences n)
     ;; If diff3 job, we should recompute fine diffs so we clear them
     ;; before reinserting flags (and thus before ediff-recenter).
     (if (and saved-p three-way)
         (ediff-clear-fine-differences n))
-
+  
     (ediff-refresh-mode-lines)
-
+  
     ;; For diff2 jobs, don't recompute fine diffs, since we know there
     ;; aren't any.  So we clear diffs after ediff-recenter.
     (if (and saved-p (not three-way))
@@ -328,13 +285,16 @@
     ;; by the user
     (message "%s" messg))
   ))
-
+  
   ;; add keybinding in a hook b/c the keymap isn't defined until the hook is run
   (add-hook 'ediff-keymap-setup-hook 'add-d-to-ediff-mode-map)
-
+  
   (defun add-d-to-ediff-mode-map ()
     (define-key ediff-mode-map "d" 'ediff-copy-D-to-C))
 #+end_src
+
+#+RESULTS:
+: add-d-to-ediff-mode-map
 
 * ruby stuff
 #+begin_src elisp
