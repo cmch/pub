@@ -5,6 +5,7 @@
 	     '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (setq package-enable-at-startup nil)
 (package-initialize)
+(setq vc-follow-symlinks t)
 
 (require 'org)
 (org-babel-load-file

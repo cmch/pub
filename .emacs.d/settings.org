@@ -77,7 +77,6 @@
      [?\M-w ?\C-e ?  ?\C-u ?\M-! ?d ?a ?t ?e ?  ?- ?d ?  ?@ ?\C-y return])
   (global-set-key (kbd "\C-z d") 'my-epoch-to-date)
 
-  (setq vc-follow-symlinks t)
 #+END_SRC
 
 * org mode stuff
@@ -335,7 +334,8 @@
 #+end_src
 
 * ruby stuff
-#+begin_src elisp
+#+begin_src emacs-lisp
+  (require 'enh-ruby-mode)
   (add-to-list 'auto-mode-alist '("\\.rb$" . enh-ruby-mode))
   (add-to-list 'interpreter-mode-alist '("ruby" . enh-ruby-mode))
   (add-to-list 'org-src-lang-modes '("ruby" . enh-ruby))
