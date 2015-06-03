@@ -1,0 +1,1 @@
+30 14 * * * /home/ec2-user/pitchfork-csv/daily-update.rb > /tmp/daily-update-$(date +'%m%d%y%H%M').log

@@ -10,8 +10,6 @@ ARGV.each do |file|
     print "Could not find or read #{file}\n"
     next
   end
-  Scrapers.scrape_details(open(file).read).each do |detail|
-    albums[file]=detail
-  end
+  albums[file]=Scrapers.scrape_details(open(file).read)
 end
 puts JSON.generate(albums)
