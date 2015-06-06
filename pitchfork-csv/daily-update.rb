@@ -43,17 +43,14 @@ log.info("pulled pitchfork reviews page - size #{headers_resp.body.bytesize}")
 today_headers = Scrapers.scrape_albums(headers_resp.body)
 
 # append new headers to master list
-headers_sorted = []
+unique_headers = {}
 header_list.each do |a|
   next unless a.is_a?(Hash)
-  a['date'] = Date.parse(a['date'])
-  headers_sorted << a
+  unique_headers[a['link']] = true
 end
-headers_sorted = headers_sorted.sort { |a,b| a['date'] <=> b['date'] }.reverse
 fresh_headers = []
 today_headers.map do |a|
-  dt = Date.parse(a['date'])
-  if dt > headers_sorted[0]['date']
+  if not unique_headers[a['link']]
     fresh_headers << a
     header_list << a
   end
@@ -65,7 +62,18 @@ s3.put_object(body: JSON.generate(header_list), bucket: bucket_name, key: header
 
 # download review details for new albums
 review_data = JSON.parse(s3.get_object(bucket: data_bucket, key: "review-data.json").body.read)
-fresh_headers.each do |h|
+review_keys = s3.list_objects(bucket: data_bucket, max_keys: 1000)
+names = {}
+loop do
+  review_keys.contents.each do |o|
+    names[o.key] = true
+  end
+  break unless review_keys.is_truncated
+  review_keys = s3.list_objects(bucket: data_bucket, max_keys: 1000, marker: review_keys.contents[-1].key)
+end
+today_headers.each do |h|
+  link =  h['link'].split('/')[3]
+  next if names[link]
   url = base_url + h['link']
   log.info("pulling #{url}")
   sleep 1 + rand * 5
