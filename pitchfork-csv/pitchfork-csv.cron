@@ -1,1 +1,2 @@
-30 14 * * * /home/ec2-user/pitchfork-csv/daily-update.rb > /tmp/daily-update-$(date +'%m%d%y%H%M').log
+MAILTO=colin.242@gmail.com
+30 13 * * * ec2-user /home/ec2-user/pitchfork-csv/daily-update.rb > /tmp/daily-update-$(date +'\%m\%d\%y\%H\%M').log 2>&1

@@ -87,7 +87,7 @@ fresh_headers.each do |h|
   end
   # update master details file
   link =  h['link'].split('/')[3]
-  review_data[link] << Scrapers.scrape_details(resp.body)
+  review_data[link] = Scrapers.scrape_details(resp.body)
   # upload reviews to s3
   s3.put_object(body: resp.body, bucket: data_bucket, key: link)
 end
