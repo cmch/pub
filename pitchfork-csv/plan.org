@@ -1,0 +1,147 @@
+* curl for the raw html?
+** how do i bash for again?
+#+begin_src sh
+  for (( N=0 ; N < 831 ; N++ )) ; curl -o "$N-review.html" --retry 2 "http://pitchfork.com/reviews/albums/$N/"; sleep $((N%2+1)) ; done
+#+end_src
+
+** curl
+#+begin_src sh
+  curl -o "$N-review.html" --retry 2 "http://pitchfork.com/reviews/albums/$N/"
+#+end_src
+
+* host in aws
+ec2-52-24-72-183.us-west-2.compute.amazonaws.com
+
+** create host
+aws ec2 run-instances --cli-input-json '{    "DryRun": false,     "ImageId": "ami-e7527ed7",     "MinCount": 1,     "MaxCount": 1,     "KeyName": "webkey",     "SecurityGroups": [        "WebHosting"    ],     "InstanceType": "t2.micro",     "Placement": {        "AvailabilityZone": "us-west-2a",         "Tenancy": ""    },     "Monitoring": {        "Enabled": false    },     "DisableApiTermination": false,     "ClientToken": "my-single-web-host3",     "EbsOptimized": false}'
+** my-single-web-host
+{
+    "OwnerId": "933788323205", 
+    "ReservationId": "r-b0291ebc", 
+    "Groups": [], 
+    "Instances": [
+        {
+            "Monitoring": {
+                "State": "disabled"
+            }, 
+            "PublicDnsName": null, 
+            "RootDeviceType": "ebs", 
+            "State": {
+                "Code": 0, 
+                "Name": "pending"
+            }, 
+            "EbsOptimized": false, 
+            "LaunchTime": "2015-05-31T23:15:50.000Z", 
+            "PrivateIpAddress": "172.31.26.239", 
+            "ProductCodes": [], 
+            "VpcId": "vpc-6af9150f", 
+            "StateTransitionReason": null, 
+            "InstanceId": "i-2de4c3db", 
+            "ImageId": "ami-e7527ed7", 
+            "PrivateDnsName": "ip-172-31-26-239.us-west-2.compute.internal", 
+            "KeyName": "awskey", 
+            "SecurityGroups": [
+                {
+                    "GroupName": "WebHosting", 
+                    "GroupId": "sg-665abb02"
+                }
+            ], 
+            "ClientToken": "my-single-web-host", 
+            "SubnetId": "subnet-e1bea895", 
+            "InstanceType": "t2.micro", 
+            "NetworkInterfaces": [
+                {
+                    "Status": "in-use", 
+                    "MacAddress": "06:e5:a8:2c:ee:65", 
+                    "SourceDestCheck": true, 
+                    "VpcId": "vpc-6af9150f", 
+                    "Description": null, 
+                    "NetworkInterfaceId": "eni-552fda1c", 
+                    "PrivateIpAddresses": [
+                        {
+                            "PrivateDnsName": "ip-172-31-26-239.us-west-2.compute.internal", 
+                            "Primary": true, 
+                            "PrivateIpAddress": "172.31.26.239"
+                        }
+                    ], 
+                    "PrivateDnsName": "ip-172-31-26-239.us-west-2.compute.internal", 
+                    "Attachment": {
+                        "Status": "attaching", 
+                        "DeviceIndex": 0, 
+                        "DeleteOnTermination": true, 
+                        "AttachmentId": "eni-attach-ce3088ef", 
+                        "AttachTime": "2015-05-31T23:15:50.000Z"
+                    }, 
+                    "Groups": [
+                        {
+                            "GroupName": "WebHosting", 
+                            "GroupId": "sg-665abb02"
+                        }
+                    ], 
+                    "SubnetId": "subnet-e1bea895", 
+                    "OwnerId": "933788323205", 
+                    "PrivateIpAddress": "172.31.26.239"
+                }
+            ], 
+            "SourceDestCheck": true, 
+            "Placement": {
+                "Tenancy": "default", 
+                "GroupName": null, 
+                "AvailabilityZone": "us-west-2a"
+            }, 
+            "Hypervisor": "xen", 
+            "BlockDeviceMappings": [], 
+            "Architecture": "x86_64", 
+            "StateReason": {
+                "Message": "pending", 
+                "Code": "pending"
+            }, 
+            "RootDeviceName": "/dev/xvda", 
+            "VirtualizationType": "hvm", 
+            "AmiLaunchIndex": 0
+        }
+    ]
+}
+** host status
+colin@c2:~$ aws ec2 describe-instances | jq '.Reservations[] | .Instances[] | {"id": .InstanceId, "state": .State, "ip": .NetworkInterfaces[] | .Association | .PublicDnsName}'
+{
+  "id": "i-25eec9d3",
+  "state": {
+    "Code": 16,
+    "Name": "running"
+  },
+  "ip": "ec2-52-24-72-183.us-west-2.compute.amazonaws.com"
+}
+** bootstrap
+rsync -r -e 'ssh -l ec2-user -i /home/colin/webkey.pem' ../pitchfork-csv ec2-user@52.26.29.32:/home/ec2-user/
+rsync -r -e 'ssh -l ec2-user -i /home/colin/webkey.pem' ~/.aws ec2-user@52.26.29.32:/home/ec2-user/
+* tear down & recreate the host
+** tear down host
+  
+#+begin_src sh
+  IID=`aws ec2 describe-instances | jq -r '.Reservations[] | .Instances[] | .InstanceId'`
+  aws ec2 terminate-instances --instance-ids "$IID"
+
+#+end_src
+ 
+** run new instance
+#+begin_src sh
+  aws ec2 run-instances --cli-input-json '{    "DryRun": false,     "ImageId": "ami-e7527ed7",     "MinCount": 1,     "MaxCount": 1,     "KeyName": "webkey",     "SecurityGroups": [        "WebHosting"    ],     "InstanceType": "t2.micro",     "Placement": {        "AvailabilityZone": "us-west-2a",         "Tenancy": ""    },     "Monitoring": {        "Enabled": false    },     "DisableApiTermination": false,          "EbsOptimized": false}'
+
+#+end_src
+
+** bind elastic ip to new instance
+#+begin_src sh
+  IID=`aws ec2 describe-instances | jq '.Reservations[] | .Instances[] | {"id": .InstanceId, "state": .State, "ip": .NetworkInterfaces[] | .Association | .PublicDnsName}' | jq -r '.id'`
+  IPID=`aws ec2 describe-addresses | jq -r '.Addresses[0] | .AllocationId' `
+  aws ec2 associate-address --instance-id "$IID" --allocation-id "$IPID"
+
+#+end_src
+
+#+RESULTS:
+| {             |                   |
+| AssociationId | eipassoc-24e93840 |
+| }             |                   |
+
+** run local-bootstrap
+** verify
