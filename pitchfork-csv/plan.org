@@ -144,4 +144,26 @@ rsync -r -e 'ssh -l ec2-user -i /home/colin/webkey.pem' ~/.aws ec2-user@52.26.29
 | }             |                   |
 
 ** run local-bootstrap
+#+begin_src sh
+
+  rsync -r -e 'ssh -l ec2-user -i /home/colin/webkey.pem' ~/projects/pub/pitchfork-csv ec2-user@52.26.29.32:/home/ec2-user/
+  rsync -r -e 'ssh -l ec2-user -i /home/colin/webkey.pem' ~/.aws ec2-user@52.26.29.32:/home/ec2-user/
+  ssh -tt 52.26.29.32 'sudo /home/ec2-user/pitchfork-csv/cron-install.sh'
+#+end_src
+
+#+RESULTS:
+
 ** verify
+curl http://52.26.29.32
+
+* web page with data tables
+
+** pick data table library & add to html
+
+** put json in hosted s3 bucket
+pitchfork-csv-web.s3-website-us-west-2.amazonaws.com
+*** make new bucket
+*** modify scripts to stich json files together and upload to hosted folder
+** load json in web page
+
+** put json in table

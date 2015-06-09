@@ -1,7 +1,7 @@
-yum update
+yum -y update
 yum -y install ruby20 ruby20-devel rubygems20-devel gcc patch zlib-devel httpd24
 gem install nokogiri aws-sdk
-chmod o+x /home/ec2-user/pitchfork-csv/pitchfork-csv.cron
+chmod 644 /home/ec2-user/pitchfork-csv/pitchfork-csv.cron
 chown root /home/ec2-user/pitchfork-csv/pitchfork-csv.cron
 ln -sf /home/ec2-user/pitchfork-csv/pitchfork-csv.cron /etc/cron.d/pitchfork-csv.cron
 chkconfig httpd on

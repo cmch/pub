@@ -87,6 +87,13 @@ today_headers.each do |h|
     puts e
     puts "Failed to get #{url}"
   end
+
+  if resp.is_a? Net::HTTPRedirection then
+    location = resp['location']
+    log.warn "redirected to #{location}"
+    resp = Net::HTTP.get_response(URI(location))
+  end
+
   if not resp.code.to_i == 200
     puts resp.code
     puts resp.message
@@ -103,5 +110,21 @@ end
 # upload master details to s3
 s3.put_object(body: JSON.generate(review_data), bucket: data_bucket, key: "review-data.json")
 
-
-
+# stitch headers and details together and upload to the web folder
+merged = {}
+header_list.each do |h|
+  key=h['link'].split('/')[3]
+  merged[key]=h
+  h.delete 'link'
+  if review_data.has_key? key
+    review_data[key].each_pair do |k,v|
+      merged[key][k]=v
+    end
+  else
+    log.error("Failed to find #{key} in review_data hash")
+  end
+end
+web_bucket='pitchfork-csv-web'
+web_key='albums.json'
+s3.put_object(body: JSON.generate(merged), bucket: web_bucket, key: web_key)
+s3.put_object_acl(bucket: web_bucket, key: web_key, grant_read:'uri="http://acs.amazonaws.com/groups/global/AllUsers"')
