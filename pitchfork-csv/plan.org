@@ -167,3 +167,7 @@ pitchfork-csv-web.s3-website-us-west-2.amazonaws.com
 ** load json in web page
 
 ** put json in table
+
+*** DONE data table w/ static samples
+
+*** TODO fix inconsistent date format
