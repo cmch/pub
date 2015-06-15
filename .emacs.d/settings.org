@@ -72,6 +72,9 @@
 
   (tool-bar-mode -1)
   (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (require 'powerline)
+  (powerline-default-theme)
 
   (fset 'my-epoch-to-date
      [?\M-w ?\C-e ?  ?\C-u ?\M-! ?d ?a ?t ?e ?  ?- ?d ?  ?@ ?\C-y return])
