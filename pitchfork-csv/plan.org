@@ -170,4 +170,21 @@ pitchfork-csv-web.s3-website-us-west-2.amazonaws.com
 
 *** DONE data table w/ static samples
 
+*** make table nice [1/4]
+
+**** DONE titles should be links
+
+**** TODO date should be first column
+
+**** TODO score should be centered
+
+**** TODO bigger table
+
 *** TODO fix inconsistent date format
+Scrapers.scrape_albums takes date directly from html
+need it to parse and reformat the date
+convert existing headers file
+
+*** TODO daily_update to update albums.js 
+
+*** TODO backfill albums.js

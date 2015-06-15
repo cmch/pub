@@ -125,6 +125,6 @@ header_list.each do |h|
   end
 end
 web_bucket='pitchfork-csv-web'
-web_key='albums.json'
-s3.put_object(body: JSON.generate(merged), bucket: web_bucket, key: web_key)
+web_key='albums.js'
+s3.put_object(body: "var albums="+JSON.generate(merged), bucket: web_bucket, key: web_key)
 s3.put_object_acl(bucket: web_bucket, key: web_key, grant_read:'uri="http://acs.amazonaws.com/groups/global/AllUsers"')

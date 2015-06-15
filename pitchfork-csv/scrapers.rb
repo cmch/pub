@@ -1,4 +1,5 @@
 require 'nokogiri'
+require 'date'
 
 module Scrapers
   def self.scrape_albums(body)
@@ -11,7 +12,7 @@ module Scrapers
                       "artist" => artist,
                       "album" => node.css('h2').inner_html,
                       "reviewer" => node.css('h3').inner_html.sub(/^by /,''),
-                      "date" => node.css('h4').inner_html
+                      "date" => Date.strptime(node.css('h4').inner_html,"%b %e, %Y").strftime("%Y-%m-%d")
                      }
     }
     return page_albums
