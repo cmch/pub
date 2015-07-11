@@ -108,7 +108,8 @@
      (sh . t)
      (clojure . t)
      (perl . t)
-     (ruby . t)))
+     (ruby . t)
+     (python . t)))
   (setq org-plantuml-jar-path
         (expand-file-name "~/plantuml.jar"))
 
@@ -118,7 +119,7 @@
 
   ;; eval without confirmation
   (defun ck/org-confirm-babel-evaluate (lang body)
-    (let ((langs '("sh" "plantuml" "emacs-lisp" "clojure" "perl" "ruby"))
+    (let ((langs '("sh" "plantuml" "emacs-lisp" "clojure" "perl" "ruby" "python"))
           (check-next (lambda (lst str)
                         (cond ((string= str (car lst)) nil)
                               ((equal 1 (length lst)) t)

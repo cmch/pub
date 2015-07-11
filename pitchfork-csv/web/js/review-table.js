@@ -2,7 +2,16 @@ $(document).ready( function () {
     $('#demo').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>' );
  
     $('#example').dataTable( {
-        "data": albums,
+	"ajax": 'https://s3-us-west-2.amazonaws.com/pitchfork-csv-web/albums.json',
+	"data_src": function(json){
+	    console.log(json);
+	    var ary=[];
+	    for (var k in json){
+		console.log(json[k]);
+	    }
+	},
+//        "data": albums,
+	"pageLength": 500,
         "columns": [
             { "title": "Link" },
             { "title": "Artist" },
