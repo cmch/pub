@@ -21,7 +21,10 @@ module Scrapers
   def self.scrape_details(body)
     page = Nokogiri::HTML(body)
     page_details={}
-    page_details["score"]=page.search('span.score').inner_html.strip
+    spans = page.search('span.score')
+    unless spans[0].nil?
+      page_details["score"] = spans[0].inner_html.strip
+    end
     return page_details
   end
   
